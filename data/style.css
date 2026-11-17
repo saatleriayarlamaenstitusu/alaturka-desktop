@@ -1,0 +1,116 @@
+/* Static styles.
+
+   Note: no `text-transform: uppercase` anywhere. GTK's CSS uppercases `i`
+   to `I` rather than `İ`, which is wrong in Turkish; the labels are
+   uppercased in JavaScript instead (src/lib/text.js). Anything that mentions the prayer-time colour lives in
+   src/lib/theme.js instead, because that colour changes at runtime and
+   GTK 4.14 has no CSS custom properties to hold it. */
+
+/* Figures are tabular everywhere a number ticks, so the layout does not
+   jitter as digits change width. A countdown that shifts sideways once a
+   second is the first thing the eye catches. */
+.tnum {
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.clock-main {
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: -2px;
+}
+
+.clock-second {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.clock-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.countdown {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+/* The six prayer times, as rows. The current one is washed with the accent
+   rather than given a solid fill: a solid row at full saturation pulls the
+   eye away from the countdown, which is the thing being read. */
+.vakit-row {
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+
+.vakit-row.passed {
+    opacity: 0.55;
+}
+
+.vakit-time {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.dot {
+    min-width: 7px;
+    min-height: 7px;
+    border-radius: 7px;
+}
+
+/* The selected day, above the grid. It is the page's answer, so it is set
+   larger than the cells that lead to it. */
+.detail-main {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+}
+
+.detail-other {
+    font-size: 15px;
+}
+
+/* Calendar grid */
+.cal-cell {
+    min-width: 40px;
+    min-height: 44px;
+    padding: 2px;
+    border-radius: 9px;
+}
+
+.cal-weekday {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+.cal-greg {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.cal-hijri {
+    font-size: 9px;
+    opacity: 0.6;
+}
+
+.cal-other-month {
+    opacity: 0.3;
+}
+
+.cal-today {
+    font-weight: 800;
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.card-soft {
+    border-radius: 14px;
+    padding: 14px;
+}

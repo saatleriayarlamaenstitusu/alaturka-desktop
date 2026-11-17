@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata. Software centres (GNOME Software, Discover, Mint's
+     Software Manager) and Flathub all read this; without it the app shows
+     up as a bare name with no description or screenshots. -->
+<component type="desktop-application">
+  <id>com.alaturkavakitler.Vakitler</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <name>Alaturka Vakitler</name>
+  <summary>Alaturka clock, prayer times and the hijri calendar</summary>
+  <summary xml:lang="tr">Alaturka saat, namaz vakitleri ve hicri takvim</summary>
+
+  <description>
+    <p>
+      The alaturka clock counts from the evening adhan rather than from
+      midnight, the way time was kept in Ottoman daily life. This app shows
+      it next to the ordinary clock, together with the day's six prayer
+      times and a countdown to the next one.
+    </p>
+    <p xml:lang="tr">
+      Alaturka saat gece yarısından değil akşam ezanından itibaren sayar.
+      Bu uygulama onu vasati saatin yanında, günün altı vakti ve sonraki
+      vakte kalan süreyle birlikte gösterir.
+    </p>
+    <p>Also included:</p>
+    <ul>
+      <li>A month calendar in either reckoning, Gregorian or hijri</li>
+      <li>The religious days — kandils, the two bayrams, arefe and Aşure</li>
+      <li>A notification at each adhan</li>
+      <li>All 81 Turkish provinces, with an offline cache</li>
+    </ul>
+    <p>
+      Prayer times come from the Diyanet İşleri Başkanlığı. The hijri
+      conversion follows Diyanet's own table of month beginnings rather than
+      an arithmetic calendar, which drifts from it by up to two days.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">com.alaturkavakitler.Vakitler.desktop</launchable>
+
+  <url type="homepage">https://alaturkavakitler.com</url>
+  <url type="bugtracker">https://github.com/saatleriayarlamaenstitusu/alaturka-desktop/issues</url>
+
+  <developer id="com.alaturkavakitler">
+    <name>Saatleri Ayarlama Enstitüsü</name>
+  </developer>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/saatleriayarlamaenstitusu/alaturka-desktop/main/docs/screenshots/clock.png</image>
+      <caption>The alaturka clock and the countdown to the next prayer</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/saatleriayarlamaenstitusu/alaturka-desktop/main/docs/screenshots/times.png</image>
+      <caption>The day's six prayer times</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/saatleriayarlamaenstitusu/alaturka-desktop/main/docs/screenshots/calendar-hijri.png</image>
+      <caption>The month in the hijri calendar, with the religious days marked</caption>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-11-17">
+      <description>
+        <p>First release: clock, prayer times, calendar, notifications.</p>
+      </description>
+    </release>
+  </releases>
+</component>

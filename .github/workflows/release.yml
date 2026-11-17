@@ -1,0 +1,100 @@
+# Builds the two packages and attaches them to a Release.
+#
+# Why these two and not an AppImage: a GJS/GTK4 app has no binary of its
+# own — it is scripts plus data, and everything it needs (gjs, GTK 4,
+# libadwaita, libsoup3) is a system library. The .deb declares them and
+# weighs 65 kB; the Flatpak gets them from the GNOME runtime. An AppImage
+# would have to carry a GTK stack and a JS interpreter inside it to achieve
+# what the other two get for free, and it would still miss the portal
+# integration the Flatpak has. So: .deb for Mint/Ubuntu, Flatpak for
+# everyone else.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deb:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The shared core is a submodule; without this the build installs
+          # an empty core/ and the app starts to a blank window.
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build libglib2.0-bin \
+            libgtk-4-bin desktop-file-utils appstream
+
+      - name: Build the package
+        run: ./build-aux/build-deb.sh "$GITHUB_WORKSPACE/_out"
+
+      - name: Check the metadata
+        run: |
+          desktop-file-validate _out/*/usr/share/applications/*.desktop
+          appstreamcli validate --no-net _out/*/usr/share/metainfo/*.metainfo.xml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: _out/*.deb
+
+  flatpak:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # Built with the distribution's flatpak-builder rather than a
+      # prebuilt `gnome-NN` container image: those images are pinned to one
+      # runtime and disappear when it goes end-of-life, and the runtime
+      # version this app wants is a line in the manifest, not a line in the
+      # workflow.
+      - name: Install flatpak
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          sudo flatpak remote-add --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install the runtime named in the manifest
+        run: |
+          version=$(grep -oP "runtime-version: '\K[^']+" \
+            build-aux/com.alaturkavakitler.Vakitler.yml)
+          sudo flatpak install -y flathub \
+            org.gnome.Platform//$version org.gnome.Sdk//$version
+
+      - name: Build the bundle
+        run: |
+          flatpak-builder --repo=_repo --force-clean --disable-rofiles-fuse \
+            _flatpak build-aux/com.alaturkavakitler.Vakitler.yml
+          flatpak build-bundle _repo alaturka-vakitler.flatpak \
+            com.alaturkavakitler.Vakitler
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak
+          path: alaturka-vakitler.flatpak
+
+  publish:
+    needs: [deb, flatpak]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/*.deb
+            dist/**/*.flatpak
+          generate_release_notes: true

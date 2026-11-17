@@ -1,0 +1,49 @@
+#!/bin/bash
+# Runs the app straight from a checkout, with no install step.
+#
+# Two things have to be arranged before the app starts:
+#   - the GSettings schema has to be compiled and findable, otherwise
+#     `new Gio.Settings()` aborts the process rather than throwing;
+#   - a desktop file has to exist under XDG_DATA_DIRS with the same name as
+#     the application ID, or notifications are dropped silently.
+#
+# `gjs` is the shipping runtime. `cjs` (Cinnamon's fork) is accepted as a
+# fallback because it runs the same code and is already installed on Mint,
+# which is where this gets tested.
+set -e
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+app_id="com.alaturkavakitler.Vakitler"
+
+if [ ! -f "$here/data/gschemas.compiled" ] \
+   || [ "$here/data/$app_id.gschema.xml" -nt "$here/data/gschemas.compiled" ]; then
+    glib-compile-schemas --strict --targetdir="$here/data" "$here/data"
+fi
+
+runtime="${ALATURKA_GJS:-}"
+if [ -z "$runtime" ]; then
+    if command -v gjs >/dev/null 2>&1; then runtime=gjs
+    elif command -v cjs >/dev/null 2>&1; then runtime=cjs
+    else
+        echo "gjs bulunamadı. Kurmak için: sudo apt install gjs" >&2
+        exit 1
+    fi
+fi
+
+# A data dir holding the .desktop file and the icon theme, prepended so the
+# real system dirs still work.
+dev_data="$here/_build/share"
+mkdir -p "$dev_data/applications"
+sed "s|@EXEC@|$here/bin/alaturka-vakitler|" \
+    "$here/data/$app_id.desktop.in" > "$dev_data/applications/$app_id.desktop"
+
+# The icon has to be on the theme search path under the application ID, or
+# the window and the about dialog fall back to the broken-image glyph.
+rm -rf "$dev_data/icons"
+cp -r "$here/data/icons" "$dev_data/icons"
+gtk-update-icon-cache -q -t -f "$dev_data/icons/hicolor" 2>/dev/null || true
+
+export GSETTINGS_SCHEMA_DIR="$here/data"
+export XDG_DATA_DIRS="$dev_data:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+
+exec "$runtime" -m "$here/src/main.js" "$@"

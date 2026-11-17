@@ -1,0 +1,4 @@
+#!/bin/sh
+# Installed launcher. The dev one (bin/alaturka-vakitler) has to arrange a
+# schema and an XDG data dir first; here both are already in the prefix.
+exec @GJS@ -m "@PKGDATADIR@/src/main.js" "$@"

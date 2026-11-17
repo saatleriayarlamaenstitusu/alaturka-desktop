@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <!-- Settings for the desktop app. The web app's own settings are a
+       superset of these; only the ones that mean something on a desktop
+       are carried over, and the keys are named the same so the two stay
+       readable side by side. -->
+  <schema id="com.alaturkavakitler.Vakitler" path="/com/alaturkavakitler/Vakitler/">
+
+    <key name="city-plate" type="s">
+      <default>"6"</default>
+      <summary>Selected city</summary>
+      <description>Turkish licence-plate code of the city, as used by the
+      prayer-time data files. 6 is Ankara.</description>
+    </key>
+
+    <key name="primary-clock" type="s">
+      <default>"alaturka"</default>
+      <summary>Which clock is the large one</summary>
+      <description>"alaturka" or "normal". The other one is shown small
+      beneath it.</description>
+    </key>
+
+    <key name="hijri-offset" type="b">
+      <default>true</default>
+      <summary>Roll the hijri date over at the evening adhan</summary>
+      <description>The hijri day begins at sunset. With this on, the date
+      shown moves forward after the evening adhan rather than at
+      midnight.</description>
+    </key>
+
+    <key name="calendar-system" type="s">
+      <default>"gregorian"</default>
+      <summary>Which calendar the month grid is built from</summary>
+      <description>"gregorian" or "hijri". This is the calendar the page
+      opens on; the page itself can be switched without changing it.</description>
+    </key>
+
+    <key name="theme" type="s">
+      <default>"auto"</default>
+      <summary>Colour scheme</summary>
+      <description>"auto", "light" or "dark".</description>
+    </key>
+
+    <key name="theme-per-vakit" type="b">
+      <default>true</default>
+      <summary>Tint the interface with the current prayer time's colour</summary>
+    </key>
+
+    <key name="notifications" type="b">
+      <default>true</default>
+      <summary>Notify at each adhan</summary>
+    </key>
+
+    <key name="last-page" type="s">
+      <default>"clock"</default>
+      <summary>Page the window opens on</summary>
+    </key>
+
+    <key name="window-width" type="i">
+      <default>520</default>
+    </key>
+    <key name="window-height" type="i">
+      <default>700</default>
+    </key>
+    <key name="window-maximized" type="b">
+      <default>false</default>
+    </key>
+  </schema>
+</schemalist>

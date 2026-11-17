@@ -1,0 +1,35 @@
+# Flatpak manifest.
+#
+# The GNOME runtime already carries GJS, GTK 4, libadwaita and libsoup3, so
+# this builds nothing: it runs the Meson install and stops. That is the
+# reason a Flatpak is worth shipping at all here — the app's dependencies
+# are exactly the runtime's contents, and users on distributions whose
+# libadwaita is older than 1.4 get a working app without touching their
+# system.
+id: com.alaturkavakitler.Vakitler
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+command: alaturka-vakitler
+
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  # Prayer times are downloaded from the data repository; without this the
+  # app only ever shows its cache.
+  - --share=network
+  # The adhan notification, which is the one thing the web app cannot do.
+  - --talk-name=org.freedesktop.Notifications
+
+cleanup:
+  - /include
+  - /share/pkgconfig
+
+modules:
+  - name: alaturka-vakitler
+    buildsystem: meson
+    sources:
+      - type: dir
+        path: ..

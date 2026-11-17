@@ -1,0 +1,57 @@
+# Runs on every push: does it install, and is the metadata valid.
+#
+# There is no unit-test suite here on purpose — the rules that could be
+# wrong (hijri conversion, religious days, the alaturka clock) live in
+# alaturka-core and are tested there against a golden reference. What this
+# repository can get wrong is the SHELL, so that is what is checked.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build gjs libglib2.0-bin \
+            gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-soup-3.0 \
+            desktop-file-utils appstream xvfb
+
+      - name: Install into a staging prefix
+        run: |
+          meson setup _build --prefix=/usr
+          DESTDIR="$PWD/_stage" meson install -C _build
+
+      - name: Validate the metadata
+        run: |
+          desktop-file-validate _stage/usr/share/applications/*.desktop
+          appstreamcli validate --no-net _stage/usr/share/metainfo/*.metainfo.xml
+          glib-compile-schemas --strict --dry-run data
+
+      - name: Start the app and quit it
+        # Catches the errors that only appear at startup — a missing import,
+        # a renamed GI method, a schema key the code reads but the schema
+        # does not declare. The app is told to quit a few seconds in.
+        run: |
+          glib-compile-schemas _stage/usr/share/glib-2.0/schemas
+          export GSETTINGS_SCHEMA_DIR="$PWD/_stage/usr/share/glib-2.0/schemas"
+          export XDG_DATA_DIRS="$PWD/_stage/usr/share:/usr/share"
+          xvfb-run -a sh -c '
+            gjs -m _stage/usr/share/alaturka-vakitler/src/main.js 2>_err.log &
+            pid=$!
+            sleep 8
+            kill $pid 2>/dev/null || true
+            wait $pid 2>/dev/null || true
+          '
+          if grep -qiE "JS ERROR|CRITICAL" _err.log; then
+            echo "::error::uygulama açılışta hata verdi"; cat _err.log; exit 1
+          fi
+          cat _err.log || true

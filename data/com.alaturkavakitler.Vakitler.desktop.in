@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Alaturka Vakitler
+GenericName=Prayer Times
+Comment=Alaturka saat, namaz vakitleri ve hicri takvim
+Exec=@EXEC@
+Icon=com.alaturkavakitler.Vakitler
+Terminal=false
+Type=Application
+Categories=Utility;Clock;
+Keywords=namaz;vakit;ezan;hicri;takvim;alaturka;saat;
+StartupNotify=true
+StartupWMClass=com.alaturkavakitler.Vakitler
+X-GNOME-UsesNotifications=true

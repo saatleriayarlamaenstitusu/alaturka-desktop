@@ -1,5 +1,13 @@
+# Build and staging trees
 _build/
+_stage/
+_mesontest/
 build/
-.flatpak-builder/
 repo/
+_repo/
+_flatpak/
+.flatpak-builder/
 *.gresource
+
+# Compiled by the dev launcher; the installed copy is compiled on the target
+data/gschemas.compiled

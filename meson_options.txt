@@ -1,0 +1,4 @@
+option('gjs',
+  type: 'string',
+  value: 'gjs',
+  description: 'Name or path of the GJS interpreter to run the app with. Set to "cjs" on a system that only ships Cinnamon\'s fork.')
