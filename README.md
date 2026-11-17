@@ -259,6 +259,24 @@ this repository can get wrong is the shell, so that is what is checked.
 Flathub is the obvious next step once the app has a stable release; the
 AppStream file (`data/*.metainfo.xml`) is already written for it.
 
+### A note on repository visibility
+
+`alaturka-core` is public, and it has to stay that way for CI: it is a
+submodule of this repository, and `actions/checkout` authenticates with the
+automatic `GITHUB_TOKEN`, which is scoped to **this** repository only. While
+both were private the submodule clone failed with
+
+```
+remote: Repository not found.
+```
+
+which is misleading — the repository existed; GitHub answers 404 rather than
+403 for a private repository the caller cannot see. Making the core public
+is the right fix rather than a workaround: it is a shared library meant to
+be used by the website, this app and a future mobile one, and Flathub builds
+from public sources. If it ever goes private again, the checkout steps need
+a PAT with read access to it.
+
 Building a `.deb` locally:
 
 ```sh

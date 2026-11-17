@@ -24,8 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # The shared core is a submodule; without this the build installs
-          # an empty core/ and the app starts to a blank window.
+          # The core is a submodule. It is a public repository, so the
+          # default token reaches it; if it is ever made private again the
+          # submodule clone fails with "Repository not found" (GitHub
+          # answers 404, not 403) and the checkout needs a PAT with read
+          # access to it.
           submodules: recursive
 
       - name: Install build dependencies
@@ -52,6 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # The core is a submodule. It is a public repository, so the
+          # default token reaches it; if it is ever made private again the
+          # submodule clone fails with "Repository not found" (GitHub
+          # answers 404, not 403) and the checkout needs a PAT with read
+          # access to it.
           submodules: recursive
 
       # Built with the distribution's flatpak-builder rather than a
