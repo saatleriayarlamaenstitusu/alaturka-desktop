@@ -105,7 +105,7 @@ src/lib/vakitler.js     fetch + merge-cache
 src/lib/store.js        the one ticking clock everything subscribes to
 src/lib/theme.js        prayer-time colour -> GTK stylesheet
 src/lib/text.js         Turkish uppercasing
-src/lib/notify.js       adhan notifications
+src/lib/notify.js       prayer-time reminders (before the adhan)
 src/ui/window.js        header, view switcher, breakpoint
 src/ui/pages/           clock, times, calendar
 src/ui/prefs.js         preferences dialog
@@ -288,8 +288,9 @@ Building a `.deb` locally:
 ## Scope
 
 **Phase 1** — prayer times with countdown, alaturka clock, hijri calendar
-and religious days, city selection, settings, and adhan notifications.
-Native notifications are the main thing the web app cannot do.
+and religious days, city selection, settings, and prayer-time reminders.
+Notifications are the main thing the web app cannot do properly: the
+browser can only remind you while its tab is open.
 
 **Phase 2** — the share-image creator.
 
@@ -334,7 +335,10 @@ switching the site over to the package closes it.
 
 City, which clock is the large one, whether the hijri date rolls over at the
 evening adhan, which calendar the month page opens on, theme, whether the
-accent follows the prayer time, and adhan notifications. Where the data
+accent follows the prayer time, and prayer-time reminders — one row per
+prayer time, each with its own amount of warning (an hour before imsak,
+a quarter of an hour before yatsı; "Kapalı" silences one, "Tam vakitte"
+announces the adhan itself). Where the data
 comes from is stated here rather than on the pages themselves — it was tried
 under the calendar's selected day and read as a footnote on every single
 date.

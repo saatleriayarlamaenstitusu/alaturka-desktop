@@ -48,7 +48,19 @@
 
     <key name="notifications" type="b">
       <default>true</default>
-      <summary>Notify at each adhan</summary>
+      <summary>Notify before each prayer time</summary>
+      <description>Master switch. Which prayer times are announced, and how
+      long beforehand, is in notify-offsets.</description>
+    </key>
+
+    <key name="notify-offsets" type="a{si}">
+      <default>{'imsak': 60, 'gunes': 20, 'ogle': 30, 'ikindi': 20, 'aksam': 30, 'yatsi': 15}</default>
+      <summary>Minutes of warning before each prayer time</summary>
+      <description>The notification is worth something only while there is
+      still time to act on it, so it is sent before the adhan rather than
+      with it. Per prayer time: -1 silences it, 0 notifies at the adhan
+      itself, any other number is minutes of warning. The defaults match
+      the web app's.</description>
     </key>
 
     <key name="last-page" type="s">

@@ -8,7 +8,32 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw?version=1';
 
-import { CITIES } from '../../core/src/index.js';
+import GLib from 'gi://GLib';
+
+import { CITIES, VAKIT_KEYS } from '../../core/src/index.js';
+
+const VAKIT_NAMES = {
+    imsak: 'İmsak', gunes: 'Güneş', ogle: 'Öğle',
+    ikindi: 'İkindi', aksam: 'Akşam', yatsi: 'Yatsı',
+};
+
+/**
+ * How much warning a prayer time can be given, as the combo row's list.
+ * -1 silences it, 0 is the adhan itself; the rest are minutes.
+ */
+const NOTIFY_CHOICES = [
+    { value: -1, label: 'Kapalı' },
+    { value: 0, label: 'Tam vakitte' },
+    { value: 5, label: '5 dakika önce' },
+    { value: 10, label: '10 dakika önce' },
+    { value: 15, label: '15 dakika önce' },
+    { value: 20, label: '20 dakika önce' },
+    { value: 30, label: '30 dakika önce' },
+    { value: 45, label: '45 dakika önce' },
+    { value: 60, label: '1 saat önce' },
+    { value: 90, label: '1,5 saat önce' },
+    { value: 120, label: '2 saat önce' },
+];
 
 /** Cities sorted by name, as a list the combo row can index into. */
 const CITY_LIST = Object.values(CITIES)
@@ -127,15 +152,73 @@ export const PrefsDialog = GObject.registerClass({
         page.add(lookGroup);
 
         // ── Notifications ──
-        const notifyGroup = new Adw.PreferencesGroup({ title: 'Bildirimler' });
+        //
+        // The warning is per prayer time because the useful amount of
+        // notice is not the same for all of them: an hour before imsak is
+        // the difference between eating and not, a quarter of an hour
+        // before yatsı is plenty.
+        const notifyGroup = new Adw.PreferencesGroup({
+            title: 'Bildirimler',
+            description: 'Vakit girmeden önce haber ver',
+        });
         const notifyRow = new Adw.SwitchRow({
-            title: 'Vakit girdiğinde bildir',
+            title: 'Vakit hatırlatması',
             active: settings.get_boolean('notifications'),
         });
         notifyRow.connect('notify::active', () => {
             settings.set_boolean('notifications', notifyRow.active);
         });
         notifyGroup.add(notifyRow);
+
+        const labels = new Gtk.StringList();
+        for (const c of NOTIFY_CHOICES) labels.append(c.label);
+
+        const offsetRows = [];
+        for (const key of VAKIT_KEYS) {
+            const row = new Adw.ComboRow({
+                title: VAKIT_NAMES[key] ?? key,
+                model: labels,
+            });
+            const current = this._offset(key);
+            row.selected = Math.max(0, NOTIFY_CHOICES.findIndex((c) => c.value === current));
+            row.connect('notify::selected', () => {
+                const choice = NOTIFY_CHOICES[row.selected];
+                if (choice) this._setOffset(key, choice.value);
+            });
+            notifyGroup.add(row);
+            offsetRows.push(row);
+        }
+
+        // Rows for an announcement that is switched off would be settings
+        // with nothing to act on; they follow the master switch.
+        const syncRows = () => {
+            const on = settings.get_boolean('notifications');
+            for (const row of offsetRows) row.sensitive = on;
+        };
+        syncRows();
+        notifyRow.connect('notify::active', syncRows);
+
         page.add(notifyGroup);
+    }
+
+    /** Minutes of warning stored for a prayer time (-1 when silenced). */
+    _offset(key) {
+        const entry = this._settings.get_value('notify-offsets').lookup_value(key, null);
+        return entry ? entry.get_int32() : -1;
+    }
+
+    /**
+     * Writes one prayer time's warning back.
+     *
+     * GSettings has no "set one entry" for a dictionary: the whole
+     * `a{si}` is replaced, so the others are read out and carried over.
+     */
+    _setOffset(key, minutes) {
+        const current = this._settings.get_value('notify-offsets').deep_unpack();
+        current[key] = minutes;
+        const builder = new GLib.VariantBuilder(GLib.VariantType.new('a{si}'));
+        for (const [k, v] of Object.entries(current))
+            builder.add_value(GLib.Variant.new('{si}', [k, v]));
+        this._settings.set_value('notify-offsets', builder.end());
     }
 });
