@@ -343,6 +343,22 @@ comes from is stated here rather than on the pages themselves — it was tried
 under the calendar's selected day and read as a footnote on every single
 date.
 
+## Promotional stills
+
+`brand/tanitim.mjs` builds the social-media cards and a short clip from the
+screenshots already in `docs/screenshots/` — the app's interface is never
+redrawn for a card, because a redrawn interface starts lying the moment the
+app changes. Typography matches the website (Inter Tight); rendering goes
+through headless Chromium over CDP.
+
+```
+node brand/tanitim.mjs     # → brand/out/ (two JPEGs + a 13 s MP4)
+```
+
+Copy for the cards follows the tone rules in the web repository's
+`brand/social/METIN.md`: address the reader as *siz*, keep the verb at the
+end, and describe what the reader does rather than what the app has.
+
 ## Licence
 
 MIT.
