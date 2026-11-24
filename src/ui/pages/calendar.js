@@ -19,11 +19,12 @@ import {
     toHijri, fromHijri, hijriMonthLength, isoDate, holyDaysBetween,
     TR_MONTHS, TR_WEEKDAYS, KINDS,
 } from '../../../core/src/index.js';
+import { publicHolidayOn } from '../../lib/public-holidays.js';
 import { upper } from '../../lib/text.js';
 
 const WEEKDAY_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(upper);
 
-const DAY = 86400000;
+const holidayFor = (date) => publicHolidayOn(date.getMonth() + 1, date.getDate());
 const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 /** Monday-based weekday slot, which is how the grid is laid out. */
 const slot = (d) => (d.getDay() + 6) % 7;
@@ -176,10 +177,19 @@ export const CalendarPage = GObject.registerClass({
             spacing: 4,
             margin_top: 8,
         });
+        this._detailHoliday = new Gtk.Label({
+            css_classes: ['badge', 'cal-holiday-badge'],
+            halign: Gtk.Align.FILL,
+            xalign: 0,
+            wrap: true,
+            margin_top: 6,
+            visible: false,
+        });
         detail.append(this._detailWeekday);
         detail.append(this._detailMain);
         detail.append(this._detailOther);
         detail.append(this._detailHoly);
+        detail.append(this._detailHoliday);
         return detail;
     }
 
@@ -278,15 +288,30 @@ export const CalendarPage = GObject.registerClass({
             const dot = new Gtk.Box({
                 css_classes: ['dot'],
                 halign: Gtk.Align.CENTER,
-                margin_top: 2,
+                valign: Gtk.Align.CENTER,
                 visible: false,
             });
             box.append(primary);
             box.append(secondary);
-            box.append(dot);
+            const holidayMark = new Gtk.Box({
+                css_classes: ['cal-holiday-mark'],
+                valign: Gtk.Align.CENTER,
+                visible: false,
+            });
+            // Shape and position keep a civil holiday distinct when the
+            // same cell also has a religious observance.
+            const marks = new Gtk.Box({
+                spacing: 4,
+                margin_top: 2,
+                halign: Gtk.Align.CENTER,
+                visible: false,
+            });
+            marks.append(dot);
+            marks.append(holidayMark);
+            box.append(marks);
 
             const button = new Gtk.Button({ child: box, css_classes: ['flat', 'cal-cell'] });
-            const cell = { button, primary, secondary, dot, date: null };
+            const cell = { button, primary, secondary, marks, dot, holidayMark, date: null };
             button.connect('clicked', () => {
                 if (!cell.date) return;
                 this._selected = cell.date;
@@ -344,9 +369,16 @@ export const CalendarPage = GObject.registerClass({
             cell.button.set_css_classes(classes);
 
             const days = holy[iso];
+            const holiday = holidayFor(date);
+            cell.holidayMark.visible = Boolean(holiday);
+            cell.marks.visible = Boolean(days || holiday);
             cell.dot.visible = Boolean(days);
             cell.dot.set_css_classes(days ? ['dot', 'vakit-dot'] : ['dot']);
-            cell.button.tooltip_text = days ? days.map((d) => d.name).join(', ') : null;
+            const names = (days ?? []).map((d) => d.name);
+            if (holiday) names.push(holiday);
+            const description = names.join(' · ');
+            cell.button.tooltip_text = description || null;
+            cell.button.update_property([Gtk.AccessibleProperty.DESCRIPTION], [description]);
         });
 
         this._drawDetail(holy[selectedISO]);
@@ -367,6 +399,9 @@ export const CalendarPage = GObject.registerClass({
             `${TR_WEEKDAYS[d.getDay()]}${isToday ? ' — Bugün' : ''}`);
         this._detailMain.label = hijriFirst ? hijri : greg;
         this._detailOther.label = hijriFirst ? greg : hijri;
+        const holiday = holidayFor(d);
+        this._detailHoliday.label = holiday ?? '';
+        this._detailHoliday.visible = Boolean(holiday);
 
         let child = this._detailHoly.get_first_child();
         while (child) {
@@ -375,6 +410,7 @@ export const CalendarPage = GObject.registerClass({
             child = nextChild;
         }
 
+        this._detailHoly.visible = Boolean(days?.length);
         for (const day of days ?? []) {
             const row = new Gtk.Box({ spacing: 8 });
             row.append(new Gtk.Label({

@@ -179,6 +179,11 @@ say so once rather than failing silently.
   date belongs to it — and the grid, the navigation and the two numbers in
   each cell read those. A second branch for the hijri grid would have meant
   two places to fix every time a cell changed.
+- **Fixed Turkish public holidays use the civil date in both views.**
+  A muted blue square marks the cell and the selected-day panel gives the
+  holiday name. On 28 October it also shows the 13:00 start time. The square
+  and the religious-day dot can appear together. The local holiday list
+  mirrors the website's `src/data/publicHolidays.js`.
 - **The prayer-time colours are not interface accents.** They were picked as
   colours of a time of day: yatsı is `#2e3b83`, which sits at 1.7:1 against
   libadwaita's dark background and cannot be read as text. `src/lib/theme.js`

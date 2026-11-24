@@ -79,6 +79,18 @@
     border-radius: 9px;
 }
 
+/* The hollow square stays distinct beside the filled religious-day dot. */
+.cal-holiday-mark {
+    min-width: 4px;
+    min-height: 4px;
+    border: 1px solid #688fb1;
+    border-radius: 1px;
+}
+
+.cal-holiday-badge {
+    background-color: rgba(104, 143, 177, 0.16);
+}
+
 .cal-weekday {
     font-size: 10px;
     font-weight: 700;

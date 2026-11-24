@@ -2,7 +2,7 @@
 # here for the INSTALL, and because a Meson project is what Flatpak, the
 # .deb rules and distro packagers all already know how to drive.
 project('alaturka-vakitler',
-  version: '0.1.0',
+  version: '0.1.1',
   meson_version: '>= 1.0.0',
   license: 'MIT',
 )
